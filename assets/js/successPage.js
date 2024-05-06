@@ -15,3 +15,7 @@ function getPaymentResponse() {
     $("#transactionId").html(data.transactionReference)
   }
 }
+
+function redirectHome(){
+    window.location.href=window.location.origin
+}
