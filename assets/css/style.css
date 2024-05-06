@@ -332,7 +332,7 @@ body {
 .product-card .card-title > a:is(:hover, :focus) { color: var(--bittersweet); }
 
 .card-price {
-  color: var(--bittersweet);
+  color: var(--white);
   font-family: var(--ff-roboto);
   font-weight: var(--fw-600);
 }
