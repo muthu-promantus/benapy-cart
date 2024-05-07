@@ -41,7 +41,7 @@ window.addEventListener("scroll", function () {
 
 $(document).ready(function () {
   $('.buyBtn').click(function () {
-    // $.LoadingOverlay("show");
+    $.LoadingOverlay("show");
     var amount = $(this).attr('data-value');
     const parameters = new URLSearchParams();
 
@@ -67,6 +67,7 @@ $(document).ready(function () {
       }
     }).catch(error => {
       console.error('Error:', error);
+      $.LoadingOverlay("hide");
     });
   });
 });
@@ -115,18 +116,18 @@ function payment(accessToken, amount) {
     console.log("Payload", options);
     fetch('https://uat-api-collect-payment.benepay.io/v1/realTimeRequestToPay', options)
       .then(response => {
-        // $.LoadingOverlay("hide");
+        $.LoadingOverlay("hide");
         return response.json();
       })
       .then(data => {
-        // $.LoadingOverlay("hide");
+        $.LoadingOverlay("hide");
         console.log("result", data);
         if (data.message != "") {
           window.location.href = data.message;
         }
       })
       .catch(error => {
-        // $.LoadingOverlay("hide");
+        $.LoadingOverlay("hide");
         console.error('Fetch error:', error);
       });
   }
