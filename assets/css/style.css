@@ -381,7 +381,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-block: 20px;
+  /* padding-block: 20px; */
 }
 
 .nav-open-btn {
