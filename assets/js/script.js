@@ -46,8 +46,8 @@ $(document).ready(function () {
     const parameters = new URLSearchParams();
 
     parameters.append('grant_type', 'client_credentials');
-    parameters.append('client_id', '2s4vqe17en72k8mgbsm7ausfiu');
-    parameters.append('client_secret', '15rsdh1b72av4mfb0pesjhgs5fe0c87u3as2t6f33u3uilvjs89s');
+    parameters.append('client_id', '3ej83tv3r8cf9qfgjpd3hj7vjb');
+    parameters.append('client_secret', '188hki7b1o85r86or7dain4dc5820jg41vh8b2440ldcl9sjs7s2');
 
     fetch('https://bene-collect.auth.eu-west-2.amazoncognito.com/oauth2/token', {
       method: 'POST',
