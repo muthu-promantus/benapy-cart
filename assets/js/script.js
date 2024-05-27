@@ -123,7 +123,7 @@ function payment(accessToken, amount) {
 
     console.log("Payload", options);
     
-    fetch('https://uat-api-collect-payment.benepay.io/v1/realTimeRequestToPay/' + encryptedval, options)
+    fetch(`https://uat-api-collect-payment.benepay.io/v1/realTimeRequestToPay/${encryptedval}`, options)
       .then(response => {
         $.LoadingOverlay("hide");
         return response.json();
