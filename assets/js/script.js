@@ -1,6 +1,6 @@
-'use strict';
+// 'use strict';
 
-const crypto = require('crypto');
+// const crypto = require('crypto');
 
 /**
  * navbar toggle
@@ -31,7 +31,7 @@ const goTopBtn = document.querySelector("[data-go-top]");
 
 // Configuration
 const SECRET_KEY = '1frbn3amvgcdbnef46ld4lcogeogikor1eme9ui9nvcebosq6gh5';
-const iv = Buffer.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+// const iv = Buffer.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
 
 window.addEventListener("scroll", function () {
   if (window.scrollY >= 80) {
@@ -108,7 +108,8 @@ function payment(accessToken, amount) {
     };
 
     // Encrypt the message
-    const encryptedval = encrypt(jsonData, SECRET_KEY);
+    var message = JSON.stringify(jsonData);
+    const encryptedval = encrypt(message, SECRET_KEY);
     console.log('Encrypted value:', encryptedval);
 
 
@@ -150,11 +151,12 @@ function payment(accessToken, amount) {
 
 function encrypt(text, password) {
   try {
-    const salt = Buffer.from(password, 'utf8');
-    const key = crypto.pbkdf2Sync(password, salt, 65536, 32, 'sha256');
-    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-    let encrypted = cipher.update(text, 'utf8', 'base64');
-    encrypted += cipher.final('base64');
+    var encrypted = CryptoJS.AES.encrypt(text, password);
+    // const salt = Buffer.from(password, 'utf8');
+    // const key = crypto.pbkdf2Sync(password, salt, 65536, 32, 'sha256');
+    // const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+    // let encrypted = cipher.update(text, 'utf8', 'base64');
+    // encrypted += cipher.final('base64');
     return encrypted;
   } catch (err) {
     console.error('Error occurred during encryption:', err);
@@ -164,11 +166,12 @@ function encrypt(text, password) {
 
 function decrypt(encryptedText, password) {
   try {
-    const salt = Buffer.from(password, 'utf8');
-    const key = crypto.pbkdf2Sync(password, salt, 65536, 32, 'sha256');
-    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-    let decrypted = decipher.update(encryptedText, 'base64', 'utf8');
-    decrypted += decipher.final('utf8');
+    var decrypted = CryptoJS.AES.decrypt(encryptedText, password);
+    // const salt = Buffer.from(password, 'utf8');
+    // const key = crypto.pbkdf2Sync(password, salt, 65536, 32, 'sha256');
+    // const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+    // let decrypted = decipher.update(encryptedText, 'base64', 'utf8');
+    // decrypted += decipher.final('utf8');
     return decrypted;
   } catch (err) {
     console.error('Error occurred during decryption:', err);
