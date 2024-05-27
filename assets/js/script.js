@@ -1,6 +1,6 @@
 'use strict';
 
-
+const crypto = require('crypto');
 
 /**
  * navbar toggle
@@ -29,6 +29,10 @@ for (let i = 0; i < navElems.length; i++) {
 const header = document.querySelector("[data-header]");
 const goTopBtn = document.querySelector("[data-go-top]");
 
+// Configuration
+const SECRET_KEY = '1frbn3amvgcdbnef46ld4lcogeogikor1eme9ui9nvcebosq6gh5';
+const iv = Buffer.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+
 window.addEventListener("scroll", function () {
   if (window.scrollY >= 80) {
     header.classList.add("active");
@@ -46,8 +50,8 @@ $(document).ready(function () {
     const parameters = new URLSearchParams();
 
     parameters.append('grant_type', 'client_credentials');
-    parameters.append('client_id', '3ej83tv3r8cf9qfgjpd3hj7vjb');
-    parameters.append('client_secret', '188hki7b1o85r86or7dain4dc5820jg41vh8b2440ldcl9sjs7s2');
+    parameters.append('client_id', '6hlf403rn6t02lu0jgfn2jqf3u');
+    parameters.append('client_secret', '1frbn3amvgcdbnef46ld4lcogeogikor1eme9ui9nvcebosq6gh5');
 
     fetch('https://bene-collect.auth.eu-west-2.amazoncognito.com/oauth2/token', {
       method: 'POST',
@@ -103,18 +107,23 @@ function payment(accessToken, amount) {
       "merchantLogoUrl": ""
     };
 
+    // Encrypt the message
+    const encryptedval = encrypt(jsonData, SECRET_KEY);
+    console.log('Encrypted value:', encryptedval);
+
+
     const options = {
       method: 'POST',
       headers: {
         "x-api-key": "m0OKyFypSF9Ndc8dLN8CW5QsKBWY0JoE7cYQNndb",
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${accessToken}`
-      },
-      body: JSON.stringify(jsonData)
+      }
     };
 
     console.log("Payload", options);
-    fetch('https://uat-api-collect-payment.benepay.io/v1/realTimeRequestToPay', options)
+    
+    fetch('https://uat-api-collect-payment.benepay.io/v1/realTimeRequestToPay/' + encryptedval, options)
       .then(response => {
         $.LoadingOverlay("hide");
         return response.json();
@@ -122,13 +131,47 @@ function payment(accessToken, amount) {
       .then(data => {
         $.LoadingOverlay("hide");
         console.log("result", data);
-        if (data.message != "") {
-          window.location.href = data.message;
+    // Decrypt the incoming data
+    if (data.message != "") {
+        const decryptedval = decrypt(data.message, SECRET_KEY);
+        console.log("Decrypted value:", decryptedval);
+
+        if (decryptedval) {
+          window.location.href = decryptedval;
         }
-      })
+      }
+    })
       .catch(error => {
         $.LoadingOverlay("hide");
         console.error('Fetch error:', error);
       });
   }
+}
+
+function encrypt(text, password) {
+  try {
+    const salt = Buffer.from(password, 'utf8');
+    const key = crypto.pbkdf2Sync(password, salt, 65536, 32, 'sha256');
+    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+    let encrypted = cipher.update(text, 'utf8', 'base64');
+    encrypted += cipher.final('base64');
+    return encrypted;
+  } catch (err) {
+    console.error('Error occurred during encryption:', err);
+  }
+  return null;
+}
+
+function decrypt(encryptedText, password) {
+  try {
+    const salt = Buffer.from(password, 'utf8');
+    const key = crypto.pbkdf2Sync(password, salt, 65536, 32, 'sha256');
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+    let decrypted = decipher.update(encryptedText, 'base64', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+  } catch (err) {
+    console.error('Error occurred during decryption:', err);
+  }
+  return null;
 }
