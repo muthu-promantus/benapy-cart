@@ -45,6 +45,7 @@ function redirectHome() {
 
 async function decryptText(encryptedText, password) {
   try {
+    const ivBytes = new Uint8Array(16);
     const encryptedBytes = base64UrlDecode(encryptedText);
     const enc = new TextEncoder();
     const passwordBytes = enc.encode(password);

@@ -147,6 +147,8 @@ async function payment(accessToken, amount) {
 async function encryptText(rawData, password) {
   try {
     // Convert raw data and password to byte arrays
+    const ivBytes = new Uint8Array(16);
+
     const enc = new TextEncoder();
     const rawDataBytes = enc.encode(rawData);
     const passwordBytes = enc.encode(password);
@@ -197,6 +199,7 @@ async function encryptText(rawData, password) {
 
 async function decryptText(encryptedText, password) {
   try {
+    const ivBytes = new Uint8Array(16);
     const encryptedBytes = base64UrlDecode(encryptedText);
     const enc = new TextEncoder();
     const passwordBytes = enc.encode(password);
