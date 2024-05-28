@@ -152,7 +152,6 @@ async function encryptText(rawData, password) {
   }
   try {
     // Convert raw data and password to byte arrays
-    const ivBytes = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
     const enc = new TextEncoder();
     const rawDataBytes = enc.encode(rawData);
     const passwordBytes = enc.encode(password);
@@ -207,7 +206,6 @@ async function decryptText(encryptedText, password) {
     return;
   }
   try {
-    const ivBytes = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
     const encryptedBytes = base64UrlDecode(encryptedText);
     const enc = new TextEncoder();
     const passwordBytes = enc.encode(password);
