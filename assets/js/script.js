@@ -146,10 +146,6 @@ async function payment(accessToken, amount) {
 
 async function encryptText(rawData, password) {
 
-  if (!window.crypto || !window.crypto.subtle) {
-    console.error('Web Crypto API not supported.');
-    return;
-  }
   try {
     // Convert raw data and password to byte arrays
     const enc = new TextEncoder();
@@ -201,10 +197,7 @@ async function encryptText(rawData, password) {
 }
 
 async function decryptText(encryptedText, password) {
-  if (!window.crypto || !window.crypto.subtle) {
-    console.error('Web Crypto API not supported.');
-    return;
-  }
+
   try {
     const encryptedBytes = base64UrlDecode(encryptedText);
     const enc = new TextEncoder();

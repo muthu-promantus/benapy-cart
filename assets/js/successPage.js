@@ -44,10 +44,7 @@ function redirectHome() {
 }
 
 async function decryptText(encryptedText, password) {
-  if (!window.crypto || !window.crypto.subtle) {
-    console.error('Web Crypto API not supported.');
-    return;
-  }
+ 
   try {
 
     const encryptedBytes = base64UrlDecode(encryptedText);
