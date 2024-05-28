@@ -2,19 +2,29 @@ $(document).ready(function () {
   getPaymentResponse();
 });
 
-function getPaymentResponse() {
+// / Configuration
+const SECRET_KEY = 'C136440B7D5AC99F4435126DAC84EB7D86F7EB3421EEB5ED66CCF25EFBE3C160';
+const ivBytes = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+ 
+async function getPaymentResponse() {
   const queryString = window.location.search;
   console.log(queryString);
 
   const urlParams = new URLSearchParams(queryString);
   const response = urlParams.get('response')
-  var decodedRes = atob(response);
+  if (response != "") {
+    const decryptedRes = await decryptText(response, SECRET_KEY);
+    console.log("Decrypted response:", decryptedRes);
 
-  if (decodedRes != "") {
-    var data = JSON.parse(decodedRes);
-    $("#transactionId").html(data.transactionReference)
+    if (decryptedRes != "") {
+      var data = JSON.parse(decryptedRes);
+      console.log("data", data);
+      $("#transactionId").html(data.transactionReference);
+    }
   }
 }
+
+
 
 function redirectHome() {
   var pathName = window.location.pathname
@@ -30,4 +40,63 @@ function redirectHome() {
 
     window.location.href = redirectUrl;
   }
+}
+
+async function decryptText(encryptedText, password) {
+  try {
+    const encryptedBytes = base64UrlDecode(encryptedText);
+    const enc = new TextEncoder();
+    const passwordBytes = enc.encode(password);
+    const saltBytes = passwordBytes;
+
+    const keyMaterial = await window.crypto.subtle.importKey(
+      "raw",
+      passwordBytes,
+      { name: "PBKDF2" },
+      false,
+      ["deriveKey"]
+    );
+
+    const key = await window.crypto.subtle.deriveKey(
+      {
+        name: "PBKDF2",
+        salt: saltBytes,
+        iterations: 65536,
+        hash: "SHA-256"
+      },
+      keyMaterial,
+      { name: "AES-CBC", length: 256 },
+      false,
+      ["decrypt"]
+    );
+
+    const decryptedBytes = await window.crypto.subtle.decrypt(
+      {
+        name: "AES-CBC",
+        iv: ivBytes
+      },
+      key,
+      encryptedBytes
+    );
+
+    const dec = new TextDecoder();
+    const decryptedText = dec.decode(decryptedBytes);
+    return decryptedText;
+  } catch (err) {
+    console.error('Error occurred during decryption:', err);
+    throw err;
+  }
+}
+
+function base64UrlDecode(base64Url) {
+  const padding = '='.repeat((4 - base64Url.length % 4) % 4);
+  const base64 = (base64Url + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
 }

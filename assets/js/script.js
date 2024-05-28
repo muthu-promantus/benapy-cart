@@ -20,8 +20,6 @@ for (let i = 0; i < navElems.length; i++) {
   });
 }
 
-
-
 /**
  * header & go top btn active on page scroll
  */
@@ -30,8 +28,8 @@ const header = document.querySelector("[data-header]");
 const goTopBtn = document.querySelector("[data-go-top]");
 
 // Configuration
-const SECRET_KEY = '1frbn3amvgcdbnef46ld4lcogeogikor1eme9ui9nvcebosq6gh5';
-// const iv = Buffer.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+const SECRET_KEY = 'C136440B7D5AC99F4435126DAC84EB7D86F7EB3421EEB5ED66CCF25EFBE3C160';
+const ivBytes = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
 
 window.addEventListener("scroll", function () {
   if (window.scrollY >= 80) {
@@ -76,7 +74,7 @@ $(document).ready(function () {
   });
 });
 
-function payment(accessToken, amount) {
+async function payment(accessToken, amount) {
   if (accessToken != "" && amount != "") {
     var currentDate = new Date();
     var currentTimestamp = new Date().getTime();
@@ -108,8 +106,7 @@ function payment(accessToken, amount) {
     };
 
     // Encrypt the message
-    var message = JSON.stringify(jsonData);
-    const encryptedval = encrypt(message, SECRET_KEY);
+    const encryptedval = await encryptText(JSON.stringify(jsonData), SECRET_KEY);
     console.log('Encrypted value:', encryptedval);
 
     const options = {
@@ -123,8 +120,8 @@ function payment(accessToken, amount) {
 
     console.log("Payload", options);
     
-    // fetch(`https://uat-api-collect-payment.benepay.io/v1/realTimeRequestToPay/${encryptedval}`, options)
-    fetch(`https://ki6f28zlli.execute-api.eu-west-2.amazonaws.com/dev/v1/realTimeRequestToPay/${encryptedval}`, options)
+    fetch(`https://uat-api-collect-payment.benepay.io/v1/realTimeRequestToPay/${encryptedval}`, options)
+    // fetch(`https://ki6f28zlli.execute-api.eu-west-2.amazonaws.com/dev/v1/realTimeRequestToPay/${encryptedval}`, options)
       .then(response => {
         $.LoadingOverlay("hide");
         return response.json();
@@ -134,12 +131,10 @@ function payment(accessToken, amount) {
         console.log("result", data);
     // Decrypt the incoming data
     if (data.message != "") {
-        const decryptedval = decrypt(data.message, SECRET_KEY);
-        console.log("Decrypted value:", decryptedval);
-
-        if (decryptedval) {
-          window.location.href = decryptedval;
-        }
+      console.log("data.message",data.message);
+          if (data.message) {
+            window.location.href = data.message;
+          }
       }
     })
       .catch(error => {
@@ -149,32 +144,117 @@ function payment(accessToken, amount) {
   }
 }
 
-function encrypt(text, password) {
+async function encryptText(rawData, password) {
   try {
-    var encrypted = CryptoJS.AES.encrypt(text, password);
-    // const salt = Buffer.from(password, 'utf8');
-    // const key = crypto.pbkdf2Sync(password, salt, 65536, 32, 'sha256');
-    // const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-    // let encrypted = cipher.update(text, 'utf8', 'base64');
-    // encrypted += cipher.final('base64');
-    return encrypted;
+    // Convert raw data and password to byte arrays
+    const enc = new TextEncoder();
+    const rawDataBytes = enc.encode(rawData);
+    const passwordBytes = enc.encode(password);
+
+    // Create salt from passwordBytes (to match Java code)
+    const saltBytes = passwordBytes;
+
+    // Derive key using PBKDF2
+    const keyMaterial = await window.crypto.subtle.importKey(
+      "raw",
+      passwordBytes,
+      { name: "PBKDF2" },
+      false,
+      ["deriveKey"]
+    );
+
+    const key = await window.crypto.subtle.deriveKey(
+      {
+        name: "PBKDF2",
+        salt: saltBytes,
+        iterations: 65536,
+        hash: "SHA-256"
+      },
+      keyMaterial,
+      { name: "AES-CBC", length: 256 },
+      false,
+      ["encrypt"]
+    );
+
+    // Encrypt the data
+    const encryptedBytes = await window.crypto.subtle.encrypt(
+      {
+        name: "AES-CBC",
+        iv: ivBytes
+      },
+      key,
+      rawDataBytes
+    );
+
+    // Encode the encrypted bytes to a base64 URL-safe string
+    const encryptedText = base64UrlEncode(new Uint8Array(encryptedBytes));
+    return encryptedText;
   } catch (err) {
     console.error('Error occurred during encryption:', err);
+    throw err;
   }
-  return null;
 }
 
-function decrypt(encryptedText, password) {
+async function decryptText(encryptedText, password) {
   try {
-    var decrypted = CryptoJS.AES.decrypt(encryptedText, password);
-    // const salt = Buffer.from(password, 'utf8');
-    // const key = crypto.pbkdf2Sync(password, salt, 65536, 32, 'sha256');
-    // const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-    // let decrypted = decipher.update(encryptedText, 'base64', 'utf8');
-    // decrypted += decipher.final('utf8');
-    return decrypted;
+    const encryptedBytes = base64UrlDecode(encryptedText);
+    const enc = new TextEncoder();
+    const passwordBytes = enc.encode(password);
+    const saltBytes = passwordBytes;
+
+    const keyMaterial = await window.crypto.subtle.importKey(
+      "raw",
+      passwordBytes,
+      { name: "PBKDF2" },
+      false,
+      ["deriveKey"]
+    );
+
+    const key = await window.crypto.subtle.deriveKey(
+      {
+        name: "PBKDF2",
+        salt: saltBytes,
+        iterations: 65536,
+        hash: "SHA-256"
+      },
+      keyMaterial,
+      { name: "AES-CBC", length: 256 },
+      false,
+      ["decrypt"]
+    );
+
+    const decryptedBytes = await window.crypto.subtle.decrypt(
+      {
+        name: "AES-CBC",
+        iv: ivBytes
+      },
+      key,
+      encryptedBytes
+    );
+
+    const dec = new TextDecoder();
+    const decryptedText = dec.decode(decryptedBytes);
+    return decryptedText;
   } catch (err) {
     console.error('Error occurred during decryption:', err);
+    throw err;
   }
-  return null;
+}
+
+function base64UrlEncode(arrayBuffer) {
+  const base64String = btoa(String.fromCharCode.apply(null, arrayBuffer));
+  return base64String.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function base64UrlDecode(base64Url) {
+  const padding = '='.repeat((4 - base64Url.length % 4) % 4);
+  const base64 = (base64Url + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
 }
