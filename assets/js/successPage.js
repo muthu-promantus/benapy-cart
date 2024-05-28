@@ -13,6 +13,7 @@ async function getPaymentResponse() {
   const urlParams = new URLSearchParams(queryString);
   const response = urlParams.get('response')
   if (response != "") {
+    console.log("responseresponseresponse",response);
     const decryptedRes = await decryptText(response, SECRET_KEY);
     console.log("Decrypted response:", decryptedRes);
 
