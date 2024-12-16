@@ -24,7 +24,7 @@ const header = document.querySelector("[data-header]");
 const goTopBtn = document.querySelector("[data-go-top]");
 
 // Configuration
-const SECRET_KEY = 'FFC8179776FDAB38EDAC70B490ADAB05D06085586B6F2E1E935514DE96442B36';
+const SECRET_KEY = '91FFA7AB0DC65F1C152840E0519882E7DC9786D1141934B6C4E52F780A5882CB';
 const ivBytes = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
 
 window.addEventListener("scroll", function () {
@@ -44,8 +44,8 @@ $(document).ready(function () {
         const parameters = new URLSearchParams();
 
         parameters.append('grant_type', 'client_credentials');
-        parameters.append('client_id', '4ilu1ehe0rlg5t52ac51trpog3');
-        parameters.append('client_secret', 'dqqvoj5q9fs175fb4g3hseudm3u2ldidef54s9udtnd3uses90r');
+        parameters.append('client_id', '6qgen7sm6ejbmo9hd3ukij908q');
+        parameters.append('client_secret', 'uc69dfl0rm1kp4210jqnet5d5d7qboc5isiug4e2qm8j230i2qg');
 
         //Request for get access token
         fetch('https://bene-collect.auth.eu-west-2.amazoncognito.com/oauth2/token', {

@@ -3,7 +3,7 @@ $(document).ready(function () {
 });
 
 // / Configuration
-const SECRET_KEY = 'C136440B7D5AC99F4435126DAC84EB7D86F7EB3421EEB5ED66CCF25EFBE3C160';
+const SECRET_KEY = '91FFA7AB0DC65F1C152840E0519882E7DC9786D1141934B6C4E52F780A5882CB';
 const ivBytes = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
  
 async function getPaymentResponse() {
