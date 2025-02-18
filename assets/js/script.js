@@ -24,7 +24,7 @@ const header = document.querySelector("[data-header]");
 const goTopBtn = document.querySelector("[data-go-top]");
 
 // Configuration
-const SECRET_KEY = '91FFA7AB0DC65F1C152840E0519882E7DC9786D1141934B6C4E52F780A5882CB';
+const SECRET_KEY = 'B0C617CB176A18EE545D6BBF8F6336EEB7E897EBD145807834C1ED89394D25E6';
 const ivBytes = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
 
 window.addEventListener("scroll", function () {
@@ -44,8 +44,8 @@ $(document).ready(function () {
         const parameters = new URLSearchParams();
 
         parameters.append('grant_type', 'client_credentials');
-        parameters.append('client_id', '6qgen7sm6ejbmo9hd3ukij908q');
-        parameters.append('client_secret', 'uc69dfl0rm1kp4210jqnet5d5d7qboc5isiug4e2qm8j230i2qg');
+        parameters.append('client_id', '4ilu1ehe0rlg5t52ac51trpog3');
+        parameters.append('client_secret', 'dqqvoj5q9fs175fb4g3hseudm3u2ldidef54s9udtnd3uses90r');
 
         //Request for get access token
         fetch('https://bene-collect.auth.eu-west-2.amazoncognito.com/oauth2/token', {
@@ -119,6 +119,47 @@ async function encryptRequestPayload(accessToken, amount) {
         console.error("Error in request encryption : ", error);
     }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    const donateBtn = document.getElementById("donateNow");
+    if (donateBtn) {
+        donateBtn.addEventListener("click", function () {
+            console.log("inside donate");
+
+            const parameters = new URLSearchParams();
+            parameters.append('grant_type', 'client_credentials');
+            parameters.append('client_id', '4ilu1ehe0rlg5t52ac51trpog3');
+            parameters.append('client_secret', 'dqqvoj5q9fs175fb4g3hseudm3u2ldidef54s9udtnd3uses90r');
+
+            fetch('https://bene-collect.auth.eu-west-2.amazoncognito.com/oauth2/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: parameters
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch token');
+                return response.json();
+            })
+            .then(data => {
+                console.log("data",data);
+                
+                console.log("OAuth2 access token:", data.access_token);
+                if (data.access_token) {
+                    const redirectUrl = `https://d2adxrnqqwuy1x.cloudfront.net/payment-request-initiate/teslanova?token=${(data.access_token)}`;
+                    console.log("redirectUrl",redirectUrl);
+                    
+                    window.location.href = redirectUrl;
+                } else {
+                    console.error("Token is empty or invalid.");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    } else {
+        console.error("Element with ID 'donateNow' not found in the DOM.");
+    }
+});
+
 
 //Making new payment request
 async function initiatePayment(encryptedRequest, accessToken) {
